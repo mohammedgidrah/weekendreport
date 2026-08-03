@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سجل التقرير الأسبوعي — التحالف الطبي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&family=Tajawal:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0f0e;
+    --panel:#121a19;
+    --panel-2:#161f1e;
+    --line:#233230;
+    --teal:#2fbf8f;
+    --teal-dim:#1c7a5c;
+    --amber:#e2a83c;
+    --red:#e2574c;
+    --text:#e9efec;
+    --muted:#8fa39d;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  html,body{
+    background:
+      radial-gradient(circle at 85% -10%, rgba(47,191,143,0.10), transparent 45%),
+      radial-gradient(circle at 10% 110%, rgba(226,87,76,0.06), transparent 40%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Tajawal',sans-serif;
+    min-height:100vh;
+  }
+  h1,h2,h3,.display{font-family:'Cairo',sans-serif;}
+  .wrap{max-width:1120px;margin:0 auto;padding:32px 20px 80px;}
+
+  /* HEADER */
+  .header{
+    position:relative;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:20px;
+    padding:28px 28px 26px;
+    background:linear-gradient(160deg, var(--panel-2), var(--panel));
+    border:1px solid var(--line);
+    border-radius:16px;
+    overflow:hidden;
+    margin-bottom:24px;
+  }
+  .header::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image: repeating-linear-gradient(-45deg, rgba(47,191,143,0.035) 0 2px, transparent 2px 26px);
+    pointer-events:none;
+  }
+  .header-titles{position:relative;z-index:1;}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--mono); font-size:11px; letter-spacing:.5px;
+    color:var(--teal); background:rgba(47,191,143,0.1);
+    border:1px solid rgba(47,191,143,0.3);
+    padding:4px 10px; border-radius:99px; margin-bottom:12px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);}
+  .header h1{font-size:26px;margin:0 0 6px;font-weight:900;}
+  .header p{margin:0;color:var(--muted);font-size:14px;}
+  .stamp{
+    position:relative;z-index:1;
+    width:96px;height:96px;flex-shrink:0;
+    border:2px solid var(--teal-dim);
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    transform:rotate(-8deg);
+    color:var(--teal);
+    font-family:var(--mono);
+    text-align:center;
+    font-size:10px;
+    line-height:1.3;
+    opacity:.75;
+  }
+  .stamp b{display:block;font-size:22px;font-family:'Cairo',sans-serif;font-weight:900;color:var(--teal);}
+
+  /* SECTIONS */
+  .section{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px 22px;
+    margin-bottom:18px;
+  }
+  .section-head{
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:16px;
+  }
+  .section-head .icon{
+    width:30px;height:30px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(47,191,143,0.12);
+    font-size:15px;
+  }
+  .section-head h2{font-size:16px;margin:0;font-weight:700;}
+  .section.discipline .section-head .icon{background:rgba(226,87,76,0.12);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;}
+
+  .stat-card{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 16px;
+    transition:border-color .15s ease;
+  }
+  .stat-card:focus-within{border-color:var(--teal-dim);}
+  .stat-card label{
+    display:block;font-size:12.5px;color:var(--muted);margin-bottom:10px;line-height:1.5;
+  }
+  .stat-row{display:flex;align-items:center;gap:8px;}
+  .stat-row button{
+    width:30px;height:30px;flex-shrink:0;
+    border-radius:8px;border:1px solid var(--line);
+    background:var(--panel);color:var(--text);
+    font-size:16px;cursor:pointer;
+    font-family:var(--mono);
+    transition:background .15s ease, color .15s ease;
+  }
+  .stat-row button:hover{background:var(--teal-dim);color:#fff;}
+  .stat-row input[type=number]{
+    flex:1;min-width:0;
+    background:transparent;border:none;outline:none;
+    color:var(--teal);font-family:var(--mono);font-size:22px;font-weight:700;
+    text-align:center;
+    -moz-appearance:textfield;
+  }
+  .discipline .stat-row input[type=number]{color:var(--red);}
+  .stat-card input[type=number]::-webkit-outer-spin-button,
+  .stat-card input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+
+  .range-row{display:flex;align-items:center;gap:10px;}
+  .range-row input[type=number]{
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    color:var(--teal);font-family:var(--mono);font-size:20px;font-weight:700;
+    text-align:center;padding:6px 4px;width:100%;outline:none;
+  }
+  .range-row .arrow{color:var(--muted);font-size:18px;}
+
+  /* NAMES */
+  .tag-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+  .tag{
+    display:flex;align-items:center;gap:6px;
+    background:var(--panel-2);border:1px solid var(--line);
+    border-radius:99px;padding:6px 6px 6px 12px;font-size:13px;font-family:var(--mono);
+    color:var(--text);
+  }
+  .tag button{
+    background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;
+    width:20px;height:20px;border-radius:50%;
+  }
+  .tag button:hover{color:var(--red);}
+  .add-row{display:flex;gap:8px;}
+  .add-row input{
+    flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;
+    padding:9px 12px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;
+  }
+  .add-row input:focus{border-color:var(--teal-dim);}
+  .add-row button{
+    background:var(--teal-dim);border:none;color:#fff;border-radius:8px;
+    padding:0 16px;font-weight:700;cursor:pointer;font-family:'Tajawal',sans-serif;
+  }
+  .add-row button:hover{background:var(--teal);}
+  .hint{color:var(--muted);font-size:11.5px;margin-top:8px;}
+
+  /* ACTIONS + PREVIEW */
+  .actions{display:flex;gap:12px;flex-wrap:wrap;margin:26px 0 18px;}
+  .btn{
+    border:none;border-radius:10px;padding:13px 22px;font-weight:700;cursor:pointer;
+    font-family:'Cairo',sans-serif;font-size:14.5px;display:inline-flex;align-items:center;gap:8px;
+    transition:transform .1s ease, box-shadow .15s ease;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--teal);color:#04140f;box-shadow:0 6px 20px -6px rgba(47,191,143,0.5);}
+  .btn-primary:hover{box-shadow:0 8px 26px -6px rgba(47,191,143,0.7);}
+  .btn-ghost{background:var(--panel-2);color:var(--text);border:1px solid var(--line);}
+  .btn-ghost:hover{border-color:var(--teal-dim);}
+
+  .preview-wrap{
+    background:#0d1413;
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+  }
+  .preview-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;border-bottom:1px solid var(--line);
+    background:var(--panel-2);
+  }
+  .preview-head span{font-family:var(--mono);font-size:12px;color:var(--muted);}
+  #reportOut{
+    width:100%;min-height:420px;
+    background:transparent;border:none;outline:none;resize:vertical;
+    color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.9;
+    padding:20px;direction:rtl;text-align:right;
+  }
+  .copied-msg{
+    font-family:var(--mono);font-size:12px;color:var(--teal);opacity:0;transition:opacity .2s ease;
+  }
+  .copied-msg.show{opacity:1;}
+
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:30px;font-family:var(--mono);}
+
+  @media (max-width:560px){
+    .header{flex-direction:column;}
+    .stamp{transform:rotate(0);align-self:flex-start;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-titles">
+      <div class="eyebrow"><span class="dot"></span> لوحة تحكم التقرير الأسبوعي</div>
+      <h1>التقرير الاسبوعي للتحالف الطبي 🏥🚑</h1>
+      <p>عدّل الأرقام والأسماء أدناه — تُحفظ تلقائيًا على هذا الجهاز — ثم ولّد نص التقرير جاهزًا للنشر في ديسكورد.</p>
+    </div>
+    <div class="stamp">التحالف<b>الطبي</b>سجل رسمي</div>
+  </div>
+
+  <!-- القيادة -->
+  <div class="section">
+    <div class="section-head"><div class="icon">👑</div><h2>القيادة</h2></div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:12.5px;color:var(--muted);margin-bottom:8px;">بقيادة (منشن القائد)</label>
+      <input type="text" id="leaderInput" placeholder="مثال: ‎<@1421952188933996594>" style="width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;">
+    </div>
+    <div>
+      <label style="display:block;font-size:12.5px;color:var(--muted);margin-bottom:8px;">ونوابه (اضغط Enter بعد كل منشن)</label>
+      <div class="tag-list" id="deputiesTags"></div>
+      <div class="add-row">
+        <input type="text" id="deputyInput" placeholder="أدخل منشن النائب ثم اضغط Enter">
+        <button onclick="addDeputy()">إضافة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- عدد الفصيل -->
+  <div class="section">
+    <div class="section-head"><div class="icon">✨</div><h2>عدد الفصيل</h2></div>
+    <div class="range-row" style="max-width:340px;">
+      <div style="flex:1;">
+        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;">من</label>
+        <input type="number" id="squadFrom">
+      </div>
+      <div class="arrow">←</div>
+      <div style="flex:1;">
+        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;">إلى</label>
+        <input type="number" id="squadTo">
+      </div>
+    </div>
+  </div>
+
+  <!-- الدوريات -->
+  <div class="section">
+    <div class="section-head"><div class="icon">🚓</div><h2>الدوريات الطبية</h2></div>
+    <div class="grid">
+      <div class="stat-card">
+        <label>🚑 دوريات الإنعاش</label>
+        <div class="stat-row">
+          <button onclick="step('patrolRevive',-1)">−</button>
+          <input type="number" id="patrolRevive">
+          <button onclick="step('patrolRevive',1)">+</button>
+        </div>
+      </div>
+      <div class="stat-card">
+        <label>🚓 دوريات الدعم والمساندة للجيش والشرطة</label>
+        <div class="stat-row">
+          <button onclick="step('patrolSupport',-1)">−</button>
+          <input type="number" id="patrolSupport">
+          <button onclick="step('patrolSupport',1)">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- المحاضرات -->
+  <div class="section">
+    <div class="section-head"><div class="icon">📚</div><h2>المحاضرات والتدريب</h2></div>
+    <div class="grid">
+      <div class="stat-card">
+        <label>📚 المحاضرات الإرشادية</label>
+        <div class="stat-row">
+          <button onclick="step('lectures',-1)">−</button>
+          <input type="number" id="lectures">
+          <button onclick="step('lectures',1)">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- الفعاليات -->
+  <div class="section">
+    <div class="section-head"><div class="icon">🎯</div><h2>الفعاليات الداخلية</h2></div>
+    <div class="grid">
+      <div class="stat-card">
+        <label>🎯 عدد الفعاليات الداخلية</label>
+        <div class="stat-row">
+          <button onclick="step('events',-1)">−</button>
+          <input type="number" id="events">
+          <button onclick="step('events',1)">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- المقابلات -->
+  <div class="section">
+    <div class="section-head"><div class="icon">📄</div><h2>المقابلات واستقطاب الكوادر</h2></div>
+    <div class="grid">
+      <div class="stat-card">
+        <label>📄 إجمالي المقابلات (مواطنين، ممرضين، دكاترة)</label>
+        <div class="stat-row">
+          <button onclick="step('interviews',-1)">−</button>
+          <input type="number" id="interviews">
+          <button onclick="step('interviews',1)">+</button>
+        </div>
+      </div>
+      <div class="stat-card">
+        <label>✅ المقبولون والمنضمون للتحالف</label>
+        <div class="stat-row">
+          <button onclick="step('accepted',-1)">−</button>
+          <input type="number" id="accepted">
+          <button onclick="step('accepted',1)">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- الانضباط -->
+  <div class="section discipline">
+    <div class="section-head"><div class="icon">⚖️</div><h2>المتابعة الإدارية والانضباط</h2></div>
+    <div class="grid">
+      <div class="stat-card">
+        <label>❌ فصل بسبب مخالفات تستوجب الفصل</label>
+        <div class="stat-row">
+          <button onclick="step('dismissViolation',-1)">−</button>
+          <input type="number" id="dismissViolation">
+          <button onclick="step('dismissViolation',1)">+</button>
+        </div>
+      </div>
+      <div class="stat-card">
+        <label>❌ فصل بسبب عدم توافق العمر مع شروط الانضمام</label>
+        <div class="stat-row">
+          <button onclick="step('dismissAge',-1)">−</button>
+          <input type="number" id="dismissAge">
+          <button onclick="step('dismissAge',1)">+</button>
+        </div>
+      </div>
+      <div class="stat-card">
+        <label>❌ فصل بسبب عدم التفاعل</label>
+        <div class="stat-row">
+          <button onclick="step('dismissInactive',-1)">−</button>
+          <input type="number" id="dismissInactive">
+          <button onclick="step('dismissInactive',1)">+</button>
+        </div>
+      </div>
+      <div class="stat-card">
+        <label>⚠️ إنذارات للأعضاء المخالفين</label>
+        <div class="stat-row">
+          <button onclick="step('warnings',-1)">−</button>
+          <input type="number" id="warnings">
+          <button onclick="step('warnings',1)">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- شكر ختامي -->
+  <div class="section">
+    <div class="section-head"><div class="icon">🙏</div><h2>الشكر والتقدير (منشن الأعضاء)</h2></div>
+    <div class="tag-list" id="thanksTags"></div>
+    <div class="add-row">
+      <input type="text" id="thanksInput" placeholder="أدخل منشن العضو ثم اضغط Enter">
+      <button onclick="addThanks()">إضافة</button>
+    </div>
+    <div class="hint">تظهر هذه الأسماء في نهاية التقرير ضمن قسم «كل الشكر والتقدير لكم».</div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" onclick="generateReport()">📝 توليد تقرير ديسكورد</button>
+    <button class="btn btn-ghost" onclick="resetAll()">↺ إعادة الضبط الافتراضي</button>
+  </div>
+
+  <div class="preview-wrap">
+    <div class="preview-head">
+      <span>معاينة التقرير — جاهز للنسخ إلى ديسكورد</span>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="copied-msg" id="copiedMsg">✓ تم النسخ</span>
+        <button class="btn btn-ghost" style="padding:8px 14px;font-size:13px;" onclick="copyReport()">نسخ النص</button>
+      </div>
+    </div>
+    <textarea id="reportOut" placeholder="اضغط «توليد تقرير ديسكورد» لعرض النص هنا..." readonly></textarea>
+  </div>
+
+  <footer>تُحفظ جميع البيانات محليًا في متصفحك (localStorage) — لا تُرسل لأي خادم.</footer>
+</div>
+
+<script>
+const STORAGE_KEY = 'medicalAllianceReport_v1';
+
+const numericFields = [
+  'squadFrom','squadTo','patrolRevive','patrolSupport','lectures','events',
+  'interviews','accepted','dismissViolation','dismissAge','dismissInactive','warnings'
+];
+
+const defaults = {
+  leader: '<@1421952188933996594>',
+  deputies: ['<@1457008504324751442>','<@434500994072576004>','<@341974252993511426>'],
+  squadFrom: 324, squadTo: 306,
+  patrolRevive: 81, patrolSupport: 26,
+  lectures: 40,
+  events: 6,
+  interviews: 137, accepted: 27,
+  dismissViolation: 19, dismissAge: 16, dismissInactive: 42, warnings: 4,
+  thanks: ['<@1182735619277979668>','<@1332678372400037964>','<@1223475106186137676>','<@1251531930021920909>','<@1375449352071548968>','<@1157920058765492254>']
+};
+
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return Object.assign({}, defaults, JSON.parse(raw));
+  }catch(e){ console.error('تعذر تحميل البيانات المحفوظة', e); }
+  return JSON.parse(JSON.stringify(defaults));
+}
+
+function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){ console.error('تعذر حفظ البيانات', e); }
+}
+
+function renderAll(){
+  numericFields.forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value = state[id];
+  });
+  document.getElementById('leaderInput').value = state.leader;
+  renderTags('deputiesTags', state.deputies, removeDeputy);
+  renderTags('thanksTags', state.thanks, removeThanks);
+}
+
+function renderTags(containerId, list, removeFn){
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  list.forEach((val, idx)=>{
+    const tag = document.createElement('div');
+    tag.className = 'tag';
+    tag.innerHTML = `<span>${escapeHtml(val)}</span>`;
+    const btn = document.createElement('button');
+    btn.textContent = '×';
+    btn.onclick = ()=> removeFn(idx);
+    tag.appendChild(btn);
+    c.appendChild(tag);
+  });
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// numeric inputs: bind + persist
+numericFields.forEach(id=>{
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const el = document.getElementById(id);
+    el.addEventListener('input', ()=>{
+      state[id] = el.value === '' ? 0 : Number(el.value);
+      saveState();
+    });
+  });
+});
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('leaderInput').addEventListener('input', (e)=>{
+    state.leader = e.target.value;
+    saveState();
+  });
+
+  document.getElementById('deputyInput').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); addDeputy(); }
+  });
+  document.getElementById('thanksInput').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); addThanks(); }
+  });
+
+  renderAll();
+});
+
+function step(id, delta){
+  const el = document.getElementById(id);
+  let v = Number(el.value || 0) + delta;
+  if(v < 0) v = 0;
+  el.value = v;
+  state[id] = v;
+  saveState();
+}
+
+function addDeputy(){
+  const input = document.getElementById('deputyInput');
+  const val = input.value.trim();
+  if(!val) return;
+  state.deputies.push(val);
+  input.value = '';
+  saveState();
+  renderTags('deputiesTags', state.deputies, removeDeputy);
+}
+function removeDeputy(idx){
+  state.deputies.splice(idx,1);
+  saveState();
+  renderTags('deputiesTags', state.deputies, removeDeputy);
+}
+
+function addThanks(){
+  const input = document.getElementById('thanksInput');
+  const val = input.value.trim();
+  if(!val) return;
+  state.thanks.push(val);
+  input.value = '';
+  saveState();
+  renderTags('thanksTags', state.thanks, removeThanks);
+}
+function removeThanks(idx){
+  state.thanks.splice(idx,1);
+  saveState();
+  renderTags('thanksTags', state.thanks, removeThanks);
+}
+
+function resetAll(){
+  if(!confirm('هل تريد إعادة كل الحقول إلى القيم الافتراضية؟ سيتم فقد التعديلات الحالية.')) return;
+  state = JSON.parse(JSON.stringify(defaults));
+  saveState();
+  renderAll();
+}
+
+function generateReport(){
+  const s = state;
+  const deputiesLines = s.deputies.map(d => `${d} <a:Weie_Krone:1364960032927514634> `).join('\n');
+  const thanksLines = s.thanks.map(t => t).join('\n');
+
+  const report =
+`التقرير الاسبوعى للتحالف الطبي <:emoji_173:1421665419063726181> <a:ambulance:1421666005695860856> 
+
+بقيادة<a:Weie_Krone:1364960032927514634> 
+${s.leader} 
+ونوابه: 
+${deputiesLines}
+
+بحمد الله وتوفيقه، نختتم أسبوعًا جديدًا من العمل والإنجاز داخل التحالف الطبي، حيث واصل الأعضاء أداء مهامهم بروح الفريق الواحد، ملتزمين بالأنظمة والتعليمات، مما أسهم في المحافظة على مستوى احترافي يعكس مكانة التحالف ويعزز حضوره المتميز.<a:110iq:1368980646147391669> 
+
+   <a:sparkle:1336484842661220394> عدد الفصيل من ${s.squadFrom}  إلى ${s.squadTo} 
+
+  <a:emoji_67:1364960082315710515> الدوريات الطبية
+<a:sparkle:1336484842661220394> تم تنفيذ هذا الأسبوع:
+
+🚑 دوريات الإنعاش: (${s.patrolRevive})
+🚓 دوريات الدعم والمساندة للجيش والشرطة: (${s.patrolSupport})
+<a:star:1336484075275288697> أبرز الملاحظات:
+• استمرار تنفيذ الدوريات بكفاءة عالية.
+• سرعة الاستجابة للحالات الطبية في مختلف المواقع.
+• تعاون مميز بين الأعضاء والالتزام الكامل أثناء أداء المهام.
+
+<a:emoji_67:1364960082315710515> المحاضرات والتدريب
+
+📚 المحاضرات الإرشادية: (${s.lectures})
+<a:star:1336484075275288697> أبرز الملاحظات:
+• استمرار تقديم المحاضرات الطبية بشكل منتظم.
+• تطوير الجوانب النظرية والعملية للأعضاء.
+• متابعة مستمرة من الطاقم التدريبي لضمان رفع مستوى الكفاءة.
+
+<a:emoji_67:1364960082315710515>  الفعاليات الداخلية
+🎯 عدد الفعاليات الداخلية: (${s.events})
+
+<a:star:1336484075275288697> أبرز الملاحظات
+• تنظيم فعاليات داخلية لتعزيز روح الفريق بين الأعضاء.
+• رفع مستوى التفاعل والتعاون داخل التحالف.
+• خلق بيئة إيجابية محفزة على العمل والانضباط.
+• تعزيز الروابط بين الأعضاء خارج نطاق المهام الرسمية.
+
+ <a:emoji_67:1364960082315710515> المقابلات واستقطاب الكوادر
+📄 إجمالي المقابلات مواطنين ، ممرضين ، دكاترة: (${s.interviews})
+<a:104iq:898856051888246835>  المقبولون والمنضمون للتحالف: (${s.accepted})
+
+<a:star:1336484075275288697> أبرز الملاحظات:
+• تنظيم المقابلات بصورة احترافية.
+• اختيار أعضاء وفق معايير التحالف.
+• استقطاب كوادر قادرة على تمثيل التحالف بأفضل صورة.
+
+📸 التغطية الإعلامي
+
+<a:odin_gif_m_54:970704921827618916>  شهد هذا الأسبوع استمرار التغطية الإعلامية لجميع الأنشطة، حيث تم:
+
+• توثيق أبرز الدوريات والفعاليات.
+• إبراز جهود أعضاء التحالف بصورة احترافية.
+• المحافظة على الهوية الإعلامية المميزة للتحالف.
+
+<a:sparkle:1336484842661220394>  المتابعة الإدارية والانضباط
+
+حرصت الإدارة على تطبيق اللوائح والأنظمة على الجميع بكل عدالة، بهدف المحافظة على بيئة عمل منظمة ومنضبطة.
+
+<a:116iq:1401719860529991813> الإجراءات الإدارية خلال الأسبوع:
+
+<a:util_star:1346172623314354207>  فصل بسبب مخالفات تستوجب الفصل: (${s.dismissViolation})
+<a:util_star:1346172623314354207>  فصل بسبب عدم توافق العمر مع شروط الانضمام: (${s.dismissAge})
+<a:util_star:1346172623314354207>  فصل بسبب عدم التفاعل: (${s.dismissInactive})
+<a:util_star:1346172623314354207>  إنذارات للأعضاء المخالفين: (${s.warnings})
+
+كما تم عقد اجتماع شامل لجميع الرتب، أُتيحت خلاله الفرصة للأعضاء لطرح آرائهم ومقترحاتهم، مع التأكيد على أهمية الالتزام بالقوانين والأنظمة والعمل بروح الفريق.
+ <a:odin_gif_h_16:979406040611311716> ختام التقرير
+
+<a:110iq:1368980646147391669> نفخر بما تحقق خلال هذا الأسبوع، ونتقدم بجزيل الشكر لكل عضو ساهم في هذا النجاح، سواءً في الميدان أو التدريب أو الإدارة أو الإعلام.<a:110iq:1368980646147391669> 
+
+ونسأل الله دوام التوفيق للجميع، وأن يواصل التحالف الطبي مسيرته نحو المزيد من الإنجازات، محافظًا على مكانته كنموذج يُحتذى به في الانضباط، والعمل الجماعي، والتميز.<a:diamond:1364959436619251752> 
+
+  كل الشكر والتقدير لكم<a:v_:1464389733194010807>
+
+${thanksLines}`;
+
+  document.getElementById('reportOut').value = report;
+}
+
+function copyReport(){
+  const ta = document.getElementById('reportOut');
+  if(!ta.value){ generateReport(); }
+  ta.select();
+  document.execCommand('copy');
+  navigator.clipboard && navigator.clipboard.writeText(ta.value).catch(()=>{});
+  const msg = document.getElementById('copiedMsg');
+  msg.classList.add('show');
+  setTimeout(()=>msg.classList.remove('show'), 1800);
+}
+
+// initial render for browsers where DOMContentLoaded already fired
+renderAll();
+</script>
+</body>
+</html>
