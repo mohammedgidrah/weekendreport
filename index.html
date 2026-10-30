@@ -218,7 +218,7 @@
     <div class="header-titles">
       <div class="eyebrow"><span class="dot"></span> لوحة تحكم التقرير الأسبوعي</div>
       <h1>التقرير الاسبوعي للتحالف الطبي 🏥🚑</h1>
-      <p>عدّل الأرقام والأسماء أدناه — تُحفظ تلقائيًا على هذا الجهاز — ثم ولّد نص التقرير جاهزًا للنشر في ديسكورد.</p>
+      <p>عدّل الأرقام والأسماء أدناه — تُحفظ تلقائيًا على هذا الجهاز — ويتحدّث نص التقرير مباشرة وجاهز للنشر في ديسكورد.</p>
     </div>
     <div class="stamp">التحالف<b>الطبي</b>سجل رسمي</div>
   </div>
@@ -368,6 +368,14 @@
           <button onclick="step('warnings',1)">+</button>
         </div>
       </div>
+      <div class="stat-card">
+        <label>⚠️ تحذيرات لعدم إرسال مهام الحفاظ على الرتبة</label>
+        <div class="stat-row">
+          <button onclick="step('rankWarnings',-1)">−</button>
+          <input type="number" id="rankWarnings">
+          <button onclick="step('rankWarnings',1)">+</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -383,7 +391,7 @@
   </div>
 
   <div class="actions">
-    <button class="btn btn-primary" onclick="generateReport()">📝 توليد تقرير ديسكورد</button>
+    <button class="btn btn-primary" onclick="generateReport()">📝 تحديث تقرير ديسكورد</button>
     <button class="btn btn-ghost" onclick="resetAll()">↺ إعادة الضبط الافتراضي</button>
   </div>
 
@@ -395,7 +403,7 @@
         <button class="btn btn-ghost" style="padding:8px 14px;font-size:13px;" onclick="copyReport()">نسخ النص</button>
       </div>
     </div>
-    <textarea id="reportOut" placeholder="اضغط «توليد تقرير ديسكورد» لعرض النص هنا..." readonly></textarea>
+    <textarea id="reportOut" placeholder="سيظهر التقرير هنا..." readonly></textarea>
   </div>
 
   <footer>تُحفظ جميع البيانات محليًا في متصفحك (localStorage) — لا تُرسل لأي خادم.</footer>
@@ -406,7 +414,7 @@ const STORAGE_KEY = 'medicalAllianceReport_v1';
 
 const numericFields = [
   'squadFrom','squadTo','patrolRevive','patrolSupport','lectures','events',
-  'interviews','accepted','dismissViolation','dismissAge','dismissInactive','warnings'
+  'interviews','accepted','dismissViolation','dismissAge','dismissInactive','warnings','rankWarnings'
 ];
 
 const defaults = {
@@ -417,7 +425,7 @@ const defaults = {
   lectures: 0,
   events: 0,
   interviews: 0, accepted: 0,
-  dismissViolation: 0, dismissAge: 0, dismissInactive: 0, warnings: 0,
+  dismissViolation: 0, dismissAge: 0, dismissInactive: 0, warnings: 0, rankWarnings: 0,
   thanks: ['<@1182735619277979668>','<@1332678372400037964>','<@1223475106186137676>','<@1251531930021920909>','<@1375449352071548968>','<@1157920058765492254>']
 };
 
@@ -426,15 +434,17 @@ let state = loadState();
 function loadState(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) return Object.assign({}, defaults, JSON.parse(raw));
+    if(raw) return Object.assign({}, JSON.parse(JSON.stringify(defaults)), JSON.parse(raw));
   }catch(e){ console.error('تعذر تحميل البيانات المحفوظة', e); }
   return JSON.parse(JSON.stringify(defaults));
 }
 
+// يحفظ الحالة ثم يحدّث التقرير مباشرة
 function saveState(){
   try{
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }catch(e){ console.error('تعذر حفظ البيانات', e); }
+  generateReport();
 }
 
 function renderAll(){
@@ -445,6 +455,7 @@ function renderAll(){
   document.getElementById('leaderInput').value = state.leader;
   renderTags('deputiesTags', state.deputies, removeDeputy);
   renderTags('thanksTags', state.thanks, removeThanks);
+  generateReport(); // التقرير يظهر تلقائيًا بالمنشنات الافتراضية
 }
 
 function renderTags(containerId, list, removeFn){
@@ -510,13 +521,13 @@ function addDeputy(){
   if(!val) return;
   state.deputies.push(val);
   input.value = '';
-  saveState();
   renderTags('deputiesTags', state.deputies, removeDeputy);
+  saveState();
 }
 function removeDeputy(idx){
   state.deputies.splice(idx,1);
-  saveState();
   renderTags('deputiesTags', state.deputies, removeDeputy);
+  saveState();
 }
 
 function addThanks(){
@@ -525,13 +536,13 @@ function addThanks(){
   if(!val) return;
   state.thanks.push(val);
   input.value = '';
-  saveState();
   renderTags('thanksTags', state.thanks, removeThanks);
+  saveState();
 }
 function removeThanks(idx){
   state.thanks.splice(idx,1);
-  saveState();
   renderTags('thanksTags', state.thanks, removeThanks);
+  saveState();
 }
 
 function resetAll(){
@@ -542,6 +553,8 @@ function resetAll(){
 }
 
 function generateReport(){
+  const out = document.getElementById('reportOut');
+  if(!out) return;
   const s = state;
   const deputiesLines = s.deputies.map(d => `${d} <a:Weie_Krone:1364960032927514634> `).join('\n');
   const thanksLines = s.thanks.map(t => t).join('\n');
@@ -612,6 +625,7 @@ ${deputiesLines}
 <a:util_star:1346172623314354207>  فصل بسبب عدم توافق العمر مع شروط الانضمام: (${s.dismissAge})
 <a:util_star:1346172623314354207>  فصل بسبب عدم التفاعل: (${s.dismissInactive})
 <a:util_star:1346172623314354207>  إنذارات للأعضاء المخالفين: (${s.warnings})
+<a:util_star:1346172623314354207>  تحذيرات لعدم إرسال مهام الحفاظ على الرتبة: (${s.rankWarnings})
 
 كما تم عقد اجتماع شامل لجميع الرتب، أُتيحت خلاله الفرصة للأعضاء لطرح آرائهم ومقترحاتهم، مع التأكيد على أهمية الالتزام بالقوانين والأنظمة والعمل بروح الفريق.
  <a:odin_gif_h_16:979406040611311716> ختام التقرير
@@ -624,7 +638,7 @@ ${deputiesLines}
 
 ${thanksLines}`;
 
-  document.getElementById('reportOut').value = report;
+  out.value = report;
 }
 
 function copyReport(){
@@ -638,7 +652,7 @@ function copyReport(){
   setTimeout(()=>msg.classList.remove('show'), 1800);
 }
 
-// initial render for browsers where DOMContentLoaded already fired
+// initial render (script is at end of body, so DOM is ready)
 renderAll();
 </script>
 </body>
